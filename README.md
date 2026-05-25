@@ -54,21 +54,25 @@ Wdrożony potok realizuje rygorystyczną, dwupoziomową strategię tagowania z p
 1.  **Znakowanie deweloperskie (Priorytet 100)**: Generuje tag oparty o skrócony hasz SHA (np. `sha-a4058d2`) przy ręcznym uruchomieniu.
 2.  **Znakowanie produkcyjne (Priorytet 200)**: Przesłanie tagu Git zgodnego z maską `v*` (np. `v1.0.0`) nadaje oficjalną sygnaturę SemVer.
 
-Wprowadzenie **zasady niezmienności obrazów** gwarantuje, że raz opublikowany tag jednoznacznie identyfikuje konkretną migawkę kodu źródłowego i nigdy nie ulegnie nadpisaniu. Celowo zrezygnowano z automatycznego generowania tagu :latest przy każdym wdrożeniu. Stosowanie :latest jest uznawane za antywzorzec w środowiskach produkcyjnych, ponieważ uniemożliwia deterministyczne wdrażanie aplikacji (nie wiemy, która dokładnie rewizja kodu jest uruchomiona) oraz prowadzi do problemów z buforowaniem warstw na węzłach uruchomieniowych.
+Dzięki temu raz opublikowany tag zawsze wskazuje na tę samą wersję kodu i nigdy nie zostanie nadpisany. Celowo zrezygnowano 
+z automatycznego generowania tagu :latest przy każdym wdrożeniu. Stosowanie :latest to zła praktyka na produkcji, ponieważ 
+nie wiemy, która dokładnie wersja kodu jest aktualnie uruchomiona, a serwery mogą mieć problem z pobraniem nowych zmian przez lokalną pamięć podatną.
 
 ---
 
 ##  3. Optymalizacja pamięci podręcznej (Cache MAX)
 
-W celu drastycznego skrócenia czasu kompilacji obrazów wieloarchitekturowych (które z natury wymagają emulacji sprzętowej 
-i zużywają znacznie więcej zasobów), potok integruje zewnętrzny rejestr DockerHub (dblaziak/repozytorium_1) jako dedykowany, scentralizowany backend pamięci podręcznej.
+Żeby maksymalnie skrócić czas budowania obrazów na różne architektury (co normalnie trwa długo przez emulacja sprzętową), 
+potok używa DockerHuba (dblaziak/repozytorium_1) jako miejsca do przechowywania pamięci podręcznej.
 
 *   **Format:** `type=registry`
 *   **Lokalizacja:** Dedykowany tag `:cache` na DockerHub.
-*   **Tryb:** `mode=max` – BuildKit zapisuje metadane i warstwy pośrednie dla wszystkich etapów zdefiniowanych w Dockerfile 
-(w tym `node_modules`).
+*   **Tryb:** `mode=max` – BuildKit zapisuje pliki tymczasowe i warstwy pośrednie dla wszystkich etapów z Dockerfile (w tym pobrane paczki `node_modules`).
 
-Dzięki temu etap instalacji pakietów i kompilacji jest pomijany przy kolejnych buildach, co skraca czas wykonania potoku z kilku minut do kilkudziesięciu sekund, a rejestr produkcyjny GHCR pozostaje wolny od technicznych plików tymczasowych
+Dzięki temu krok instalacji pakietów i kompilacji jest pomijany przy kolejnych uruchomieniach potoku. Skraca to czas budowania 
+z kilku minut do zaledwie kilkudziesięciu sekund, a rejestr produkcyjny GHCR pozostaje czysty.
+
+Trzymanie tego wszystkiego pod jednym tagiem :cache na zewnętrznym DockerHubie pozwala uniknąć zaśmiecania głównego rejestru aplikacji na GitHubie technicznymi plikami, a przy tym pozwala na szybkie budowanie kodu podczas codziennej pracy.
 
 ---
 
@@ -77,35 +81,36 @@ Dzięki temu etap instalacji pakietów i kompilacji jest pomijany przy kolejnych
 W roli automatycznej bramki bezpieczeństwa wdrożono skaner **Trivy** od firmy Aqua Security.
 
 ### Konfiguracja Bramki:
-*   Wykrycie błędów **HIGH** lub **CRITICAL** przerywa potok (`exit-code: 1`).
-*   Zastosowano flagę `ignore-unfixed: true`.
-*   Czytelność logów zapewnia format tabelaryczny (format: 'table') generowany bezpośrednio w konsoli runnera
+*   **exit-code: 1** – Wykrycie błędów o statusie HIGH lub CRITICAL natychmiast przerywa działanie potoku i blokuje wrzucenie obrazu do sieci.
+*   **ignore-unfixed: true** – Ta opcja pomija luki, dla których twórcy oprogramowania nie wydali jeszcze oficjalnych poprawek.
+*   **format: 'table'** – Wyniki skanowania są wyświetlane w czytelnej tabeli bezpośrednio w logach potoku na GitHubie.
 
 ### Uzasadnienie wykorzystania:
-1.  **Unikanie fałszywych alarmów:** Ignorowanie podatności, dla których nie wydano oficjalnych poprawek, zapobiega paraliżowi procesu CI/CD.
-2.  **Skupienie na działaniu:** Bramka koncentruje się na lukach, które deweloper może realnie wyeliminować (np. poprzez aktualizację zależności w `package.json`).
-3.  **Niezawodność:** Trivy zapewnia stabilną i prostą integrację z GitHub Actions.
+1.  **Unikanie fałszywych alarmów:** Skanowanie małych systemów (jak Alpine) często wykrywa błędy systemowe, na które deweloper nie ma wpływu. Ignorowanie podatności bez gotowych poprawek chroni potok przed bezsensownym blokowaniem pracy.
+2.  **Skupienie na działaniu:** Bramka koncentruje się tylko na tych lukach, które możemy sami naprawić (np. przez aktualizację bibliotek w pliku `package.json` albo zmianę obrazu bazowego).
+3.  **Niezawodność:** Trivy jest prosty w konfiguracji i działa stabilniej w GitHub Actions niż Docker Scout.
 
 ---
 
 ## 5. Podsumowanie wdrożenia i weryfikacja działania
 
-Poprawność operacyjna zaimplementowanego łańcucha CI/CD została w pełni potwierdzona testami.
+Poprawność działania całego potoku CI/CD została w pełni potwierdzona testami.
 
 ### Etapy weryfikacji:
 
-1. **Ręczne wyzwolenie potoku z poziomu terminala za pomocą narzędzia GitHub CLI:**
+1. **Ręczne uruchomienie potoku z poziomu terminala za pomocą GitHub CLI:**
    ``` bash 
    gh workflow run ci-package.yml --ref master 
    ```
-   Operacja zakończyła się pełnym sukcesem systemowym (status: success), potwierdzając bezbłędne przejście przez bramkę jakościową Trivy.
+   Potok zakończył się sukcesem (status: success), co potwierdza, że obraz pomyślnie przeszedł przez skaner Trivy.
 
-2. **Oficjalna publikacja i dystrybucja:**
-   System poprawnie rozdzielił role rejestrów zewnętrznych. Dane pamięci podręcznej (cache backend) zostały pomyślnie odłożone na DockerHubie, natomiast zweryfikowany, wieloarchitekturowy obraz produkcyjny trafił do rejestru GitHub Container Registry.
+2. **Oficjalna publikacja:**
+   System poprawnie rozdzielił zadania. Pamięć podręczna (cache) trafiła na DockerHuba, a sprawdzony i bezpieczny obraz aplikacji został wysłany do GitHub Container Registry (ghcr.io).
 
-3. **Ostateczny test integralności:**
-   Pomyślne pobranie gotowego kontenera z chmury na lokalną stację roboczą za pomocą wygenerowanego unikalnego tagu SHA:
+3. **Ostateczny test pobrania obrazu:**
+   Pomyślnie sprawdzono pobieranie gotowego kontenera z chmury na lokalny komputer za pomocą unikalnego tagu SHA:
    ``` bash
    docker pull ghcr.io/domblaziak/tch_zadanie2:sha-a4058d2
    ```
-Wdrożony potok w pełni realizuje założenia paradygmatu DevSecOps, gwarantując automatyzację, powtarzalność kompilacji, niezmienność wydań oraz ciągłe monitorowanie podatności kodu.
+   
+Wdrożone rozwiązanie w pełni realizuje zasady DevSecOps – gwarantuje automatyzację, szybkie budowanie, bezpieczne wersjonowanie kodu oraz stałą kontrolę bezpieczeństwa aplikacji.
