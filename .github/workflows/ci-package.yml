@@ -75,7 +75,7 @@ jobs:
           cache-from: type=registry,ref=${{ vars.DOCKERHUB_USERNAME }}/repozytorium_1:cache
 
       # Skanowanie podatności kryptograficznych i błędów w bibliotekach
-      # 'exit-code: true' powoduje natychmiastowe przerwanie potoku, jeśli wykryto błędy CRITICAL lub HIGH.
+      # 'exit-code: true' powoduje natychmiastowe przerwanie potoku, jeśli wykryto błędy CRITICAL
       - name: Skanowanie obrazu pod kątem CVE
         uses: docker/scout-action@v1
         with:
