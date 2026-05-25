@@ -1,41 +1,36 @@
 name: Zadanie 2 - Pipeline CI/CD dla GHCR i DockerHub
 
 on:
-  workflow_dispatch: # Umożliwia manualne uruchomienie potoku przez gh CLI lub interfejs WWW
+  workflow_dispatch: # Umożliwia manualne uruchomienie potoku
   push:
     tags:
-      - 'v*' 
+      - 'v*' # Automatyczny trigger po przesłaniu tagu wersji (np. v1.0.0)
 
 jobs:
   build-and-secure:
     name: Proces budowania i weryfikacji bezpieczeństwa obrazu
     runs-on: ubuntu-latest
     
-    # Nadanie uprawnień niezbędnych do zapisu paczek w GitHub Container Registry
     permissions:
-      contents: read     # Zezwolenie na odczyt kodu źródłowego aplikacji
-      packages: write    # Zezwolenie na publikację obrazu w ghcr.io
-      id-token: write    # Zapis tokenów ID dla bezpiecznej autoryzacji w DockerHub
+      contents: read     # Odczyt kodu źródłowego
+      packages: write    # Publikacja obrazu w rejestrze ghcr.io
+      id-token: write    # Bezpieczna autoryzacja OIDC
 
     steps:
-      # Pobranie kodu źródłowego aplikacji z repozytorium na dysk wirtualny runnera
-      - name: Sprawdzenie repozytorium
+      - name: Pobranie kodu źródłowego
         uses: actions/checkout@v4
 
-      # Rejestracja emulatorów QEMU w systemie operacyjnym (wymóg dla architektury arm64)
-      - name: Ustawienie QEMU dla wieloarchitekturowego budowania
+      - name: Konfiguracja QEMU (Multi-arch)
         uses: docker/setup-qemu-action@v3
         with:
           platforms: arm64,amd64
 
-      # Konfiguracja zaawansowanego mechanizmu BuildKit ze sterownikiem domyślnym dla Docker Scout
-      - name: Ustawienie Buildx dla wieloarchitekturowego budowania
+      - name: Konfiguracja Buildx (BuildKit)
         uses: docker/setup-buildx-action@v3
         with:
           version: latest
-          endpoint: default # Zapewnia dostęp lokalnego skanera Scout do bazy obrazów Dockera
+          endpoint: default # Dostęp dla lokalnego skanera Scout
 
-      # Bezpieczna autoryzacja w rejestrze GitHub za pomocą dynamicznego tokenu GITHUB_TOKEN
       - name: Logowanie do GHCR
         uses: docker/login-action@v3
         with:
@@ -43,15 +38,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Logowanie do DockerHub przy użyciu tokenu PAT w celu obsługi magazynu cache
       - name: Logowanie do DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Ekstrakcja metadanych oraz definicja unikalnych strategii tagowania (SHA oraz SemVer)
-      - name: Generowanie metadanych obrazu
+      - name: Ekstrakcja metadanych i strategii tagowania (SemVer & SHA)
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -62,38 +55,32 @@ jobs:
           flavor: |
             latest=false 
 
-      # Kompilacja i załadowanie obrazu na architekturę hosta (load: true)
-      # Warstwy muszą fizycznie załadować się do pamięci podręcznej, aby Scout mógł je przeanalizować.
-      - name: Budowanie lokalnego obrazu do analizy CVE
+      - name: Budowanie lokalnego obrazu pod testy CVE
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
-          push: false # Nie wypychamy tego obrazu jeszcze do GHCR, jest on przeznaczony wyłącznie do lokalnej analizy
-          load: true  # Ładowanie obrazu bezpośrednio do lokalnego demona Docker
+          push: false # Obraz przeznaczony wyłącznie do lokalnej analizy Scout
+          load: true  # Ładowanie do lokalnego demona Docker
           tags: ghcr.io/${{ github.repository }}:test-cve
           cache-from: type=registry,ref=${{ vars.DOCKERHUB_USERNAME }}/repozytorium_1:cache
 
-      # Skanowanie podatności kryptograficznych i błędów w bibliotekach
-      # 'exit-code: true' powoduje natychmiastowe przerwanie potoku, jeśli wykryto błędy CRITICAL
-      - name: Skanowanie obrazu pod kątem CVE
+      - name: Skanowanie obrazu pod kątem CVE (Docker Scout)
         uses: docker/scout-action@v1
         with:
           command: cve
           image: ghcr.io/${{ github.repository }}:test-cve
-          only-severities: critical
+          only-severities: critical # Blokada potoku wyłącznie dla błędów CRITICAL
           exit-code: true
 
-      # Budowanie na dwie platformy sprzętowe z zaawansowanym eksportem cache w trybie MAX
-      # Uruchamia się wyłącznie wtedy, gdy skanowanie CVE zakończy się sukcesem, co gwarantuje, że tylko bezpieczne obrazy trafią do GHCR.
-      - name: Budowanie i wypychanie obrazu wieloarchitekturowego do GHCR z cache max na DockerHub
+      - name: Kompilacja wieloarchitekturowa i push do GHCR (Cache MAX)
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64 # Wsparcie dla maszyn x86_64 oraz procesorów ARM
-          push: true                          # Wypchnięcie bezpiecznego i zweryfikowanego obrazu do ghcr.io
+          platforms: linux/amd64,linux/arm64
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ vars.DOCKERHUB_USERNAME }}/repozytorium_1:cache
-          cache-to: type=registry,ref=${{ vars.DOCKERHUB_USERNAME }}/repozytorium_1:cache,mode=max # Zapis warstw pośrednich buildera
+          cache-to: type=registry,ref=${{ vars.DOCKERHUB_USERNAME }}/repozytorium_1:cache,mode=max
