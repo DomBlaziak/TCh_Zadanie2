@@ -6,6 +6,10 @@ on:
     tags:
       - 'v*' # Automatyczny trigger po przesłaniu tagu wersji (SemVer)
 
+# Wymuszenie użycia Node.js 24 dla wszystkich akcji, aby wyczyścić ostrzeżenia deprecation
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   build-and-secure:
     name: Proces budowania i weryfikacji bezpieczeństwa obrazu
@@ -14,7 +18,7 @@ jobs:
     permissions:
       contents: read     # Wymagane do pobrania kodu źródłowego
       packages: write    # Wymagane do zapisu gotowego obrazu w ghcr.io
-      id-token: write    # Wymagane do bezpiecznej autoryzacji OIDC
+      id-token: write    # Wymagane do bezpiecznej autoryzacji do GHCR i DockerHub
 
     steps:
       - name: Pobranie kodu źródłowego
