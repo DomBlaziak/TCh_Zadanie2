@@ -66,8 +66,8 @@ i zużywają znacznie więcej zasobów), potok integruje zewnętrzny rejestr Doc
 *   **Tryb:** `mode=max` – BuildKit zapisuje metadane i warstwy pośrednie dla wszystkich etapów zdefiniowanych w Dockerfile 
 (w tym `node_modules`).
 
-
 Dzięki temu etap instalacji pakietów i kompilacji jest pomijany przy kolejnych buildach, co skraca czas wykonania potoku z kilku minut do kilkudziesięciu sekund, a rejestr produkcyjny GHCR pozostaje wolny od technicznych plików tymczasowych
+
 ---
 
 ##  4. Bramka bezpieczeństwa CVE (Wdrożenie skanera Trivy)
