@@ -71,7 +71,7 @@ jobs:
           push: false # Nie wypychamy tego obrazu jeszcze do GHCR, jest on przeznaczony wyłącznie do lokalnej analizy
           load: true  # Ładowanie obrazu bezpośrednio do lokalnego demona Docker
           tags: ghcr.io/${{ github.repository }}:test-cve
-          cache-from: type=registry,ref=${{ vars.DOCKERHUB_USERNAME }}/weather-cache:cache-main
+          cache-from: type=registry,ref=${{ vars.DOCKERHUB_USERNAME }}/repozytorium_1:cache
 
       # Skanowanie podatności kryptograficznych i błędów w bibliotekach
       # 'exit-code: true' powoduje natychmiastowe przerwanie potoku, jeśli wykryto błędy CRITICAL lub HIGH.
@@ -94,5 +94,5 @@ jobs:
           push: true                          # Wypchnięcie bezpiecznego i zweryfikowanego obrazu do ghcr.io
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ vars.DOCKERHUB_USERNAME }}/weather-cache:cache-main
-          cache-to: type=registry,ref=${{ vars.DOCKERHUB_USERNAME }}/weather-cache:cache-main,mode=max # Zapis warstw pośrednich buildera
+          cache-from: type=registry,ref=${{ vars.DOCKERHUB_USERNAME }}/repozytorium_1:cache
+          cache-to: type=registry,ref=${{ vars.DOCKERHUB_USERNAME }}/repozytorium_1:cache,mode=max # Zapis warstw pośrednich buildera
