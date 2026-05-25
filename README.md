@@ -104,13 +104,22 @@ Poprawność działania całego potoku CI/CD została w pełni potwierdzona test
    ```
    Potok zakończył się sukcesem (status: success), co potwierdza, że obraz pomyślnie przeszedł przez skaner Trivy.
 
-2. **Oficjalna publikacja:**
+   Uwaga: Aby ta komenda oraz kolejne kroki zadziałały, należy najpierw wejść w terminalu do głównego folderu z plikami naszego projektu.
+
+2. **Automatyczne uruchomienie potoku przez nadanie tagu wersji (SemVer):**
+  ``` bash
+  git tag v1.0.0
+  git push origin v1.0.0
+  ```
+  Wypchnięcie tagu do repozytorium automatycznie uruchomiło proces budowania i nadało oficjalną sygnaturę produkcyjną v1.0.0 z priorytetem ważności 200.
+  
+3. **Oficjalna publikacja:**
    System poprawnie rozdzielił zadania. Pamięć podręczna (cache) trafiła na DockerHuba, a sprawdzony i bezpieczny obraz aplikacji został wysłany do GitHub Container Registry (ghcr.io).
 
-3. **Ostateczny test pobrania obrazu:**
+4. **Ostateczny test pobrania obrazu:**
    Pomyślnie sprawdzono pobieranie gotowego kontenera z chmury na lokalny komputer za pomocą unikalnego tagu SHA:
    ``` bash
    docker pull ghcr.io/domblaziak/tch_zadanie2:sha-a4058d2
    ```
-   
+
 Wdrożone rozwiązanie w pełni realizuje zasady DevSecOps – gwarantuje automatyzację, szybkie budowanie, bezpieczne wersjonowanie kodu oraz stałą kontrolę bezpieczeństwa aplikacji.
