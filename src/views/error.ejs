@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<head><title>Błąd</title></head>
+<body>
+  <h1>Wystąpił błąd serwera</h1>
+  <p><%= message %></p>
+  <% if(error) { %> <pre><%= error.status %>: <%= error.stack %></pre> <% } %>
+  <a href="/">Wróć do strony głównej</a>
+</body>
+</html>

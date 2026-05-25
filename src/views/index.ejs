@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Pogoda - Dominik Blaziak</title>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
+  </head>
+  <body>
+    <div class="container">
+      <fieldset>
+      <h2>Check Weather</h2> <form action="/" method="post">
+      <select name="city" class="ghost-input">
+        <% cities.forEach(function(city) { %>
+          <option value="<%= city.query %>"><%= city.name %></option>
+        <% }); %>
+        </select>
+        <input type="submit" class="ghost-button" value="Get Weather"> </form>
+        <% if(weather !== null) { %>
+        <p class="result"><%= weather %></p>
+        <% } %>
+        <% if(error !== null) { %>
+        <p class="error"><%= error %></p>
+        <% } %>
+      </fieldset>
+  </div>
+  </body>
+</html>

@@ -1,0 +1,16 @@
+#!/usr/bin/env node
+var app = require('../app');
+var http = require('http');
+
+const AUTHOR = "Dominik Blaziak";
+const PORT = process.env.PORT || '3000';
+const START_DATE = new Date().toLocaleString('pl-PL');
+
+var server = http.createServer(app);
+
+server.listen(PORT, () => {
+    console.log(`[DATA]: ${START_DATE}`);
+    console.log(`[AUTOR]: ${AUTHOR}`);
+    console.log(`[PORT]: ${PORT}`);
+    console.log(`Serwer pogodowy uruchomiony poprawnie.`);
+});

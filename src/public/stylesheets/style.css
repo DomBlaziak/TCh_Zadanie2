@@ -1,0 +1,83 @@
+/* Styles based on: https://codepen.io/official_naveen/pen/rgknI
+  Adapted for WeatherApp - Dominik Błaziak
+*/
+
+body {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Open Sans', sans-serif;
+  background-color: #f4f4f4;
+}
+
+.container {
+  width: 600px;
+  margin: 50px auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+fieldset {
+  border: 0;
+  padding: 30px;
+}
+
+h2 {
+  text-align: center;
+  color: #333;
+  font-weight: 300;
+}
+
+.ghost-input {
+  display: block;
+  font-weight: 300;
+  width: 100%;
+  font-size: 25px;
+  border: 0;
+  border-bottom: 1px solid #ddd; 
+  outline: none;
+  box-sizing: border-box;
+  color: #4b545f;
+  background: #fff;
+  font-family: 'Open Sans', Verdana;
+  padding: 10px 15px;
+  margin: 30px 0;
+  transition: all 0.1s ease-in-out;
+}
+
+.ghost-input:focus {
+  border-bottom: 1px solid #515151;
+}
+
+.ghost-button {
+  background-color: transparent;
+  border: 2px solid #ddd;
+  padding: 10px 30px;
+  width: 100%;
+  min-width: 350px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.1s ease-in-out;
+}
+
+.ghost-button:hover {
+  border: 2px solid #515151;
+  background-color: #f9f9f9;
+}
+
+.result {
+  color: #2e7d32; /* Ciemnozielony dla sukcesu */
+  font-size: 22px;
+  text-align: center;
+  font-weight: 400;
+  margin-top: 20px;
+}
+
+.error {
+  color: #c62828; /* Czerwony dla błędów */
+  font-size: 18px;
+  text-align: center;
+  margin-top: 20px;
+}
