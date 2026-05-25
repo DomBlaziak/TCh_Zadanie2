@@ -56,6 +56,8 @@ Wdrożony potok realizuje rygorystyczną, dwupoziomową strategię tagowania z p
 
 Wprowadzenie **zasady niezmienności obrazów** gwarantuje, że raz opublikowany tag jednoznacznie identyfikuje konkretną migawkę kodu źródłowego i nigdy nie ulegnie nadpisaniu. Celowo zrezygnowano z automatycznego generowania tagu :latest przy każdym wdrożeniu. Stosowanie :latest jest uznawane za antywzorzec w środowiskach produkcyjnych, ponieważ uniemożliwia deterministyczne wdrażanie aplikacji (nie wiemy, która dokładnie rewizja kodu jest uruchomiona) oraz prowadzi do problemów z buforowaniem warstw na węzłach uruchomieniowych.
 
+---
+
 ##  3. Optymalizacja pamięci podręcznej (Cache MAX)
 
 W celu drastycznego skrócenia czasu kompilacji obrazów wieloarchitekturowych (które z natury wymagają emulacji sprzętowej 
@@ -84,6 +86,7 @@ W roli automatycznej bramki bezpieczeństwa wdrożono skaner **Trivy** od firmy 
 2.  **Skupienie na działaniu:** Bramka koncentruje się na lukach, które deweloper może realnie wyeliminować (np. poprzez aktualizację zależności w `package.json`).
 3.  **Niezawodność:** Trivy zapewnia stabilną i prostą integrację z GitHub Actions.
 
+---
 
 ## 5. Podsumowanie wdrożenia i weryfikacja działania
 
