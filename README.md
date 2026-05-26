@@ -118,5 +118,14 @@ Poprawność działania całego potoku CI/CD została w pełni potwierdzona test
    ``` bash
    docker pull ghcr.io/domblaziak/tch_zadanie2:sha-e7e05e7
    ```
+   Następnie zweryfikowano poprawne działanie aplikacji w środowisku izolowanym poprzez uruchomienie kontenera z przekierowaniem portu produkcyjnego na port lokalny serwera (aplikacja wewnątrz kontenera nasłuchuje na porcie 3000):
+   ``` bash
+   docker run -d -p 8080:3000 --name test_aplikacji ghcr.io/domblaziak/tch_zadanie2:sha-e7e05e7
+   ```
 
+   Po uruchomieniu komendy serwer pogodowy wystartował poprawnie, a aplikacja stała się dostępna w przeglądarce pod adresem http://localhost:8080. Poprawność działania i odbiór żądań HTTP (statusy GET / 200) potwierdzono inspekcją logów kontenera:
+   ``` bash
+      docker logs test_aplikacji
+   ```
+   
 Wdrożone rozwiązanie w pełni realizuje zasady DevSecOps – gwarantuje automatyzację, szybkie budowanie, bezpieczne wersjonowanie kodu oraz stałą kontrolę bezpieczeństwa aplikacji.
