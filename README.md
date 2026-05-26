@@ -39,8 +39,7 @@ Wdrożony potok automatyzacji w pliku `.github/workflows/ci-package.yml` został
 *   **Emulacja sprzętowa QEMU (`docker/setup-qemu-action@v3`)**: Instalacja emulatorów pozwalających na bezproblemowe budowanie obrazów dla architektur nie-natywnych (ARM64) na maszynach wirtualnych x86_64.
 *   **Konfiguracja środowiska Buildx (`docker/setup-buildx-action@v3`)**: Aktywacja silnika BuildKit, obsługującego zaawansowane mechanizmy cache-owania.
 *   **Logowanie do rejestrów (`docker/login-action@v3`)**: Autoryzacja w GHCR (używając `GITHUB_TOKEN`) oraz w DockerHubie (używając bezpiecznych sekretów).
-*   **Ekstrakcja metadanych (`docker/metadata-action@v5`)**: Automatyczne generowanie etykiet i tagów. 
-    *    Krok ten wymusza małe litery w nazwie repozytorium, zapobiegając błędom rejestru `ghcr.io`.
+*   **Ekstrakcja metadanych (`docker/metadata-action@v5`)**: Aby zapobiec restrykcyjnym błędom rejestru ghcr.io, w ścieżce obrazu jawnie wymuszono użycie małych liter poprzez zmienną `github.repository_owner` oraz ręczne wpisanie nazwy repozytorium z małych liter. Zapobiega to awariom manifestu w przypadku pojawienia się wielkich liter w loginie GitHub.
 *   **Lokalne budowanie testowe**: Kompilacja obrazu pod tagiem `test-cve:latest` bez wypychania do sieci w celu weryfikacji bezpieczeństwa. Wykorzystanie flagi load: true oraz push: false pozwala na przeskanowanie kontenera bez obciążania sieci transferem niesprawdzonego obrazu.
 *   **Skanowanie podatności (Trivy)**: Statyczna analiza kodu i warstw OS w poszukiwaniu luk bezpieczeństwa (CVE).
 *   **Kompilacja wieloarchitekturowa i dystrybucja**: Silnik BuildKit kompiluje obrazy dla `linux/amd64` oraz `linux/arm64`, łączy je w jeden manifest i przesyła do GHCR.
@@ -117,7 +116,7 @@ Poprawność działania całego potoku CI/CD została w pełni potwierdzona test
 4. **Ostateczny test pobrania obrazu:**
    Pomyślnie sprawdzono pobieranie gotowego kontenera z chmury na lokalny komputer za pomocą unikalnego tagu SHA:
    ``` bash
-   docker pull ghcr.io/domblaziak/tch_zadanie2:sha-a4058d2
+   docker pull ghcr.io/domblaziak/tch_zadanie2:sha-e7e05e7
    ```
 
 Wdrożone rozwiązanie w pełni realizuje zasady DevSecOps – gwarantuje automatyzację, szybkie budowanie, bezpieczne wersjonowanie kodu oraz stałą kontrolę bezpieczeństwa aplikacji.
