@@ -22,7 +22,7 @@ Wdrożony potok automatyzacji w pliku `.github/workflows/ci-package.yml` został
                                     [ 6. Test Build (Local) ]
                                                 │
                                                 ▼
-                  [ 7. Skaner Trivy ] ──► (Wykryto HIGH/CRITICAL?) ──► [ STOP / Exit 1 ]
+                                        [ 7. Skaner Trivy ] ──► (Wykryto HIGH/CRITICAL?) ──► [ STOP / Exit 1 ]
                                                 │
                                              [ NIE ]
                                                 │
