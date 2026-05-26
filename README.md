@@ -54,10 +54,7 @@ Wdrożony potok realizuje rygorystyczną, dwupoziomową strategię tagowania z p
 1.  **Znakowanie deweloperskie (Priorytet 100)**: Generuje tag oparty o skrócony hasz SHA (np. `sha-a4058d2`) przy ręcznym uruchomieniu.
 2.  **Znakowanie produkcyjne (Priorytet 200)**: Przesłanie tagu Git zgodnego z maską `v*` (np. `v1.0.0`) nadaje oficjalną sygnaturę SemVer.
 
-Dzięki temu raz opublikowany tag zawsze wskazuje na tę samą wersję kodu i nigdy nie zostanie nadpisany. Celowo zrezygnowano 
-z automatycznego generowania tagu :latest przy każdym wdrożeniu. Stosowanie :latest to zła praktyka na produkcji, ponieważ 
-nie wiemy, która dokładnie wersja kodu jest aktualnie uruchomiona, a serwery mogą mieć problem z pobraniem nowych zmian przez lokalną pamięć podatną.
-
+Stosowanie :latest to zła praktyka na produkcji, ponieważ nie wiemy, która dokładnie wersja kodu jest aktualnie uruchomiona, a serwery mogą mieć problem z pobraniem nowych zmian przez lokalną pamięć podręczną. Warto dodać, że taka dwupoziomowa polityka (SHA dla deweloperów, SemVer dla produkcji) to bezpośrednia realizacja oficjalnego standardu OCI (Open Container Initiative) oraz metodologii 12-Factor App (zasada rozdzielania etapów budowania i wydań). Dzięki temu cały cykl życia aplikacji staje się w pełni bezpieczny, a każda zmiana w kodzie ma swój unikalny, łatwy do namierzenia ślad.
 ---
 
 ##  3. Optymalizacja pamięci podręcznej (Cache MAX)
@@ -72,7 +69,7 @@ potok używa DockerHuba (dblaziak/repozytorium_1) jako miejsca do przechowywania
 Dzięki temu krok instalacji pakietów i kompilacji jest pomijany przy kolejnych uruchomieniach potoku. Skraca to czas budowania 
 z kilku minut do zaledwie kilkudziesięciu sekund, a rejestr produkcyjny GHCR pozostaje czysty.
 
-Trzymanie tego wszystkiego pod jednym tagiem :cache na zewnętrznym DockerHubie pozwala uniknąć zaśmiecania głównego rejestru aplikacji na GitHubie technicznymi plikami, a przy tym pozwala na szybkie budowanie kodu podczas codziennej pracy.
+W przeciwieństwie do obrazu aplikacji, tag :cache celowo nie jest niezmienny. Każdy kolejny udany build nadpisuje ten tag nowym stanem warstw. Gdybyśmy robili unikalne tagi dla cache, szybko skończyłoby się miejsce na DockerHubie, a potok nie potrafiłby automatycznie odnaleźć bazy do pobrania warstw. Stały tag :cache gwarantuje, że potok zawsze odpytuje o najświeższy, skumulowany stan projektu. Taki ruch pozwala na ciągłe aktualizowanie bazy plików tymczasowych (np. przy dodaniu nowej paczki w package.json) bez generowania śmieciowych, archiwalnych plików na koncie DockerHub.
 
 ---
 
