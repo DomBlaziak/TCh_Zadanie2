@@ -69,7 +69,9 @@ potok używa DockerHuba (dblaziak/repozytorium_1) jako miejsca do przechowywania
 Dzięki temu krok instalacji pakietów i kompilacji jest pomijany przy kolejnych uruchomieniach potoku. Skraca to czas budowania 
 z kilku minut do zaledwie kilkudziesięciu sekund, a rejestr produkcyjny GHCR pozostaje czysty.
 
-W przeciwieństwie do obrazu aplikacji, tag :cache celowo nie jest niezmienny. Każdy kolejny udany build nadpisuje ten tag nowym stanem warstw. Gdybyśmy robili unikalne tagi dla cache, szybko skończyłoby się miejsce na DockerHubie, a potok nie potrafiłby automatycznie odnaleźć bazy do pobrania warstw. Stały tag :cache gwarantuje, że potok zawsze odpytuje o najświeższy, skumulowany stan projektu. Taki ruch pozwala na ciągłe aktualizowanie bazy plików tymczasowych (np. przy dodaniu nowej paczki w package.json) bez generowania śmieciowych, archiwalnych plików na koncie DockerHub.
+W przeciwieństwie do obrazów aplikacji, tag :cache celowo ma charakter zmienny (jest nadpisywany). Każdy kolejny udany build nadpisuje ten tag nowym stanem warstw. Gdybyśmy robili unikalne tagi dla cache, szybko skończyłoby się miejsce na DockerHubie, 
+a potok nie potrafiłby automatycznie odnaleźć bazy do pobrania warstw. Stały tag :cache gwarantuje, że potok zawsze odpytuje 
+o najświeższy, skumulowany stan projektu. Taki ruch pozwala na ciągłe aktualizowanie bazy plików tymczasowych (np. przy dodaniu nowej paczki w package.json) bez generowania śmieciowych, archiwalnych plików na koncie DockerHub.
 
 ---
 
@@ -108,7 +110,8 @@ Poprawność działania całego potoku CI/CD została w pełni potwierdzona test
   git tag v1.0.0
   git push origin v1.0.0
   ```
-  Wypchnięcie tagu do repozytorium automatycznie uruchomiło proces budowania i nadało oficjalną sygnaturę produkcyjną v1.0.0 z priorytetem ważności 200.
+  Wypchnięcie tagu do repozytorium automatycznie uruchomiło proces budowania i nadało oficjalną sygnaturę produkcyjną v1.0.0 
+  z priorytetem ważności 200.
   
 3. **Oficjalna publikacja:**
    System poprawnie rozdzielił zadania. Pamięć podręczna (cache) trafiła na DockerHuba, a sprawdzony i bezpieczny obraz aplikacji został wysłany do GitHub Container Registry (ghcr.io).
