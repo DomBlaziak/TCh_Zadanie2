@@ -10,24 +10,24 @@ Wdrożony potok automatyzacji w pliku `.github/workflows/ci-package.yml` został
                                           [ Kod źródłowy ]
                                                 │
                                                 ▼
-                                          [ 1. Checkout ] ──► [ 2. QEMU ] ──► [ 3. Buildx ]
+                              [ 1. Checkout ] ──► [ 2. QEMU ] ──► [ 3. Buildx ]
                                                 │
                                                 ▼
-                                          [ 4. Logowanie ] (GHCR & DockerHub)
+                                [ 4. Logowanie ] (GHCR & DockerHub)
                                                 │
                                                 ▼
-                                          [ 5. Metadane ] (SemVer / SHA)
+                                   [ 5. Metadane ] (SemVer / SHA)
                                                 │
                                                 ▼
-                                          [ 6. Test Build (Local) ]
+                                    [ 6. Test Build (Local) ]
                                                 │
                                                 ▼
-                                          [ 7. Skaner Trivy ] ──► (Wykryto HIGH/CRITICAL?) ──► [ STOP / Exit 1 ]
+                  [ 7. Skaner Trivy ] ──► (Wykryto HIGH/CRITICAL?) ──► [ STOP / Exit 1 ]
                                                 │
                                              [ NIE ]
                                                 │
                                                 ▼
-                                          [ 8. Multi-arch Build & Push GHCR ] (AMD64/ARM64 + Cache MAX)
+                  [ 8. Multi-arch Build & Push GHCR ] (AMD64/ARM64 + Cache MAX)
 ```
 
 ### Szczegółowy opis kroków:
