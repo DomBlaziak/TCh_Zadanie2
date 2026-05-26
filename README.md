@@ -7,30 +7,27 @@ Wdrożony potok automatyzacji w pliku `.github/workflows/ci-package.yml` został
 
 ### Schemat przepływu danych
 ```text
-[ Kod źródłowy ]
-      │
-      ▼
-[ 1. Checkout ] ──► [ 2. QEMU ] ──► [ 3. Buildx ]
-      │
-      ▼
-[ 4. Logowanie ] (GHCR & DockerHub)
-      │
-      ▼
-[ 5. Metadane ] (SemVer / SHA)
-      │
-      ▼
-[ 6. Test Build (Local) ]
-      │
-      ▼
-[ 7. Skaner Trivy ] ──► (Wykryto HIGH/CRITICAL?) ──► [ STOP / Exit 1 ]
-      │
-    [ NIE ]
-      │
-      ▼
-[ 8. Multi-arch Build ] (AMD64/ARM64 + Cache MAX)
-      │
-      ▼
-[ 9. Push GHCR ]
+                                          [ Kod źródłowy ]
+                                                │
+                                                ▼
+                                          [ 1. Checkout ] ──► [ 2. QEMU ] ──► [ 3. Buildx ]
+                                                │
+                                                ▼
+                                          [ 4. Logowanie ] (GHCR & DockerHub)
+                                                │
+                                                ▼
+                                          [ 5. Metadane ] (SemVer / SHA)
+                                                │
+                                                ▼
+                                          [ 6. Test Build (Local) ]
+                                                │
+                                                ▼
+                                          [ 7. Skaner Trivy ] ──► (Wykryto HIGH/CRITICAL?) ──► [ STOP / Exit 1 ]
+                                                │
+                                          [ NIE ]
+                                                │
+                                                ▼
+                                          [ 8. Multi-arch Build & Push GHCR ] (AMD64/ARM64 + Cache MAX)
 ```
 
 ### Szczegółowy opis kroków:
@@ -38,12 +35,11 @@ Wdrożony potok automatyzacji w pliku `.github/workflows/ci-package.yml` został
 *   **Pobranie kodu źródłowego (`actions/checkout@v4`)**: Klonowanie zawartości repozytorium do tymczasowego katalogu roboczego runnera.
 *   **Emulacja sprzętowa QEMU (`docker/setup-qemu-action@v3`)**: Instalacja emulatorów pozwalających na bezproblemowe budowanie obrazów dla architektur nie-natywnych (ARM64) na maszynach wirtualnych x86_64.
 *   **Konfiguracja środowiska Buildx (`docker/setup-buildx-action@v3`)**: Aktywacja silnika BuildKit, obsługującego zaawansowane mechanizmy cache-owania.
-*   **Logowanie do rejestrów (`docker/login-action@v3`)**: Autoryzacja w GHCR (używając `GITHUB_TOKEN`) oraz w DockerHubie (używając bezpiecznych sekretów).
+*   **Logowanie do rejestrów (`docker/login-action@v3`)**: Autoryzacja w GHCR (używając GITHUB_TOKEN) oraz w DockerHubie (używając bezpiecznych sekretów).
 *   **Ekstrakcja metadanych (`docker/metadata-action@v5`)**: Aby zapobiec restrykcyjnym błędom rejestru ghcr.io, w ścieżce obrazu jawnie wymuszono użycie małych liter poprzez zmienną `github.repository_owner` oraz ręczne wpisanie nazwy repozytorium z małych liter. Zapobiega to awariom manifestu w przypadku pojawienia się wielkich liter w loginie GitHub.
-*   **Lokalne budowanie testowe (`docker/build-push-action@v6`)**: Kompilacja obrazu pod tagiem `test-cve:latest` bez wypychania do sieci w celu weryfikacji bezpieczeństwa. Wykorzystanie flagi load: true oraz push: false pozwala na przeskanowanie kontenera bez obciążania sieci transferem niesprawdzonego obrazu.
-*   **Skanowanie podatności (Trivy) (`aquasecurity/trivy-action@master`)**: Statyczna analiza kodu i warstw OS w poszukiwaniu 
-luk bezpieczeństwa (CVE).
-*   **Kompilacja wieloarchitekturowa i dystrybucja (`docker/build-push-action@v6`)**: Silnik BuildKit kompiluje obrazy dla `linux/amd64` oraz `linux/arm64`, łączy je w jeden manifest i przesyła do GHCR.
+*   **Lokalne budowanie testowe (`docker/build-push-action@v6`)**: Kompilacja obrazu pod tagiem `test-cve:latest` bez wypychania do sieci w celu weryfikacji bezpieczeństwa. Wykorzystanie flagi `load: true` oraz `push: false` pozwala na przeskanowanie kontenera bez obciążania sieci transferem niesprawdzonego obrazu.
+*   **Skanowanie podatności (Trivy) (`aquasecurity/trivy-action@master`)**: Statyczna analiza kodu i warstw OS w poszukiwaniu luk bezpieczeństwa (CVE). Wykrycie zagrożeń typu HIGH lub CRITICAL natychmiast przerywa działanie potoku.
+*   **Kompilacja wieloarchitekturowa i dystrybucja (`docker/build-push-action@v6`)**: Silnik BuildKit kompiluje ostateczne obrazy równolegle dla linux/amd64 oraz linux/arm64 przy użyciu cache z DockerHuba. Następnie warstwy są łączone w jeden wspólny manifest wieloarchitekturowy i przesyłane do GitHub Container Registry (GHCR).
 
 ---
 
