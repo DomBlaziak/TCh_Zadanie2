@@ -55,6 +55,7 @@ Wdrożony potok realizuje rygorystyczną, dwupoziomową strategię tagowania z p
 2.  **Znakowanie produkcyjne (Priorytet 200)**: Przesłanie tagu Git zgodnego z maską `v*` (np. `v1.0.0`) nadaje oficjalną sygnaturę SemVer.
 
 Stosowanie :latest to zła praktyka na produkcji, ponieważ nie wiemy, która dokładnie wersja kodu jest aktualnie uruchomiona, a serwery mogą mieć problem z pobraniem nowych zmian przez lokalną pamięć podręczną. Warto dodać, że taka dwupoziomowa polityka (SHA dla deweloperów, SemVer dla produkcji) to bezpośrednia realizacja oficjalnego standardu OCI (Open Container Initiative) oraz metodologii 12-Factor App (zasada rozdzielania etapów budowania i wydań). Dzięki temu cały cykl życia aplikacji staje się w pełni bezpieczny, a każda zmiana w kodzie ma swój unikalny, łatwy do namierzenia ślad.
+
 ---
 
 ##  3. Optymalizacja pamięci podręcznej (Cache MAX)
