@@ -43,7 +43,7 @@ Wdrożony potok automatyzacji w pliku `.github/workflows/ci-package.yml` został
 *   **Lokalne budowanie testowe (`docker/build-push-action@v6`)**: Kompilacja obrazu pod tagiem `test-cve:latest` bez wypychania do sieci w celu weryfikacji bezpieczeństwa. Wykorzystanie flagi load: true oraz push: false pozwala na przeskanowanie kontenera bez obciążania sieci transferem niesprawdzonego obrazu.
 *   **Skanowanie podatności (Trivy) (`aquasecurity/trivy-action@master`)**: Statyczna analiza kodu i warstw OS w poszukiwaniu 
 luk bezpieczeństwa (CVE).
-*   **Kompilacja wieloarchitekturowa i dystrybucja *(`docker/build-push-action@v6`)**: Silnik BuildKit kompiluje obrazy dla `linux/amd64` oraz `linux/arm64`, łączy je w jeden manifest i przesyła do GHCR.
+*   **Kompilacja wieloarchitekturowa i dystrybucja (`docker/build-push-action@v6`)**: Silnik BuildKit kompiluje obrazy dla `linux/amd64` oraz `linux/arm64`, łączy je w jeden manifest i przesyła do GHCR.
 
 ---
 
