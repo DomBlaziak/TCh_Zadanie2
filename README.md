@@ -59,7 +59,7 @@ Stosowanie :latest to zła praktyka na produkcji, ponieważ nie wiemy, która do
 
 ##  3. Optymalizacja pamięci podręcznej (Cache MAX)
 
-Żeby maksymalnie skrócić czas budowania obrazów na różne architektury (co normalnie trwa długo przez emulacja sprzętową), 
+Żeby maksymalnie skrócić czas budowania obrazów na różne architektury (co normalnie trwa długo przez emulację sprzętową), 
 potok używa DockerHuba (dblaziak/repozytorium_1) jako miejsca do przechowywania pamięci podręcznej.
 
 *   **Format:** `type=registry`
