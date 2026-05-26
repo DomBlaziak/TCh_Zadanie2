@@ -24,7 +24,7 @@ Wdrożony potok automatyzacji w pliku `.github/workflows/ci-package.yml` został
                                                 ▼
                                           [ 7. Skaner Trivy ] ──► (Wykryto HIGH/CRITICAL?) ──► [ STOP / Exit 1 ]
                                                 │
-                                          [ NIE ]
+                                             [ NIE ]
                                                 │
                                                 ▼
                                           [ 8. Multi-arch Build & Push GHCR ] (AMD64/ARM64 + Cache MAX)
